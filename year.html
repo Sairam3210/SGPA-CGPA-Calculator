@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGPA Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e9ecef;
+            margin: 0;
+            padding: 0;
+            background-image: url('your-background-image.png'); /* Replace with your image path */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: hsla(57, 89%, 45%, 0.902); /* Slightly transparent background */
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #343a40;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: hsl(303, 49%, 14%);
+            outline: none;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin-right: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 5px solid hsl(130, 56%, 14%);
+            border-radius: 4px;
+            text-align: center;
+            font-size: 18px;
+            color: #495057;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CGPA Calculator</h1>
+        <form id="cgpa-form">
+            <div class="form-group">
+                <label for="name">Student Name:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="roll-number">Roll Number:</label>
+                <input type="text" id="roll-number" required>
+            </div>
+            <div class="form-group">
+                <label for="course & Branche">Course & Branch:</label>
+                <input type="text" id="course & Branch" required>
+            </div>
+            <div class="form-group">
+                <label for="Academic Year">Academic Year:(Ex:2020-2024)</label>
+                <input type="text" id="Academic Year" required>
+            </div>
+
+            <h2>Semester Grades</h2>
+            <div id="semesters">
+                <!-- Semester inputs will be appended here -->
+            </div>
+
+            <button type="button" id="add-semester">Add Semester</button>
+            <button type="submit">Calculate CGPA</button>
+        </form>
+
+        <div id="result" class="result"></div>
+
+        <div class="button-container">
+            <button type="button" id="reset-button">Reset</button>
+            <button class="print-button" onclick="window.print()">Print CGPA Report</button>
+        </div>
+    </div>
+
+    <script> 
+        document.addEventListener("DOMContentLoaded", function () {
+    const addSemesterButton = document.getElementById("add-semester");
+    const semestersDiv = document.getElementById("semesters");
+    const cgpaForm = document.getElementById("cgpa-form");
+    const resultDiv = document.getElementById("result");
+    const resetButton = document.getElementById("reset-button"); // Reset button element
+
+    let semesterCount = 0;
+
+    // Function to add semester input fields
+    addSemesterButton.addEventListener("click", function () {
+        if (semesterCount < 8) {
+            semesterCount++;
+            const semesterInput = document.createElement("div");
+            semesterInput.classList.add("form-group");
+            semesterInput.innerHTML = `
+                <label for="semester${semesterCount}">Semester ${semesterCount} Grade:</label>
+                <input type="number" id="semester${semesterCount}" required min="0" max="10" step="0.1">
+            `;
+            semestersDiv.appendChild(semesterInput);
+        } else {
+            alert("Maximum of 8 semesters can be added.");
+        }
+    });
+
+    // Function to calculate CGPA
+    cgpaForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        let totalGrades = 0;
+        for (let i = 1; i <= semesterCount; i++) {
+            const grade = parseFloat(document.getElementById(`semester${i}`).value);
+            totalGrades += grade;
+        }
+        const cgpa = (totalGrades / semesterCount).toFixed(2);
+        resultDiv.innerHTML = `<h2>CGPA: ${cgpa}</h2>`;
+    });
+
+    // Function to reset the form
+    resetButton.addEventListener("click", function () {
+        cgpaForm.reset();
+        resultDiv.innerHTML = '';
+        semestersDiv.innerHTML = '';
+        semesterCount = 0;
+    });
+});
+
+    </script>
+
+    
+</body>
+</html>

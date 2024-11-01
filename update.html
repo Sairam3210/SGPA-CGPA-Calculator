@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGPA Calculator</title>
+    <style>
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            color: #333;
+        }
+        header, footer {
+            background-color: #3b0b47;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 15px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+        th {
+            background-color: hsl(195, 32%, 72%);
+        }
+        .button {
+            padding: 10px 15px;
+            margin-top: 15px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
+        .reset-button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .reset-button:hover {
+            background-color: #c82333;
+        }
+        .edit-button {
+            background-color: hsl(20, 91%, 50%);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .edit-button:hover {
+            background-color: #0056b3;
+        }
+        .print-button {
+            background-color: hsl(217, 97%, 54%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .print-button:hover {
+            background-color: #138496;
+        }
+        .result {
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        .center-header {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #3b0b47;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SGPA Calculator</h1>
+    </header>
+    
+    <div class="center-header" id="resultHeader">
+        <!-- Year and Semester title will appear here -->
+    </div>
+
+    <h2>Select Year and Semester</h2>
+    <p>
+        <label for="yearSelect"><strong>Year:</strong></label>
+        <select id="yearSelect" onchange="updateSemesterOptions(); updateResultHeader()">
+            <option value="">Select Year</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+        </select>
+    </p>
+    <p>
+        <label for="semesterSelect"><strong>Semester:</strong></label>
+        <select id="semesterSelect" onchange="updateResultHeader()">
+            <!-- Options will be populated based on selected year -->
+        </select>
+    </p>
+
+    <h2>Student Information</h2>
+    <p><strong>Name:</strong> <input type="text" id="studentName" placeholder="Enter Name"></p>
+    <p><strong>Roll Number:</strong> <input type="text" id="rollNumber" placeholder="Enter Roll Number"></p>
+    <p><strong>Course & Branch</strong> <input type="text" id="courseBranch" placeholder="Enter Course & Branch"></p>
+
+    <h2>Course Details</h2>
+    <button class="button" onclick="addSubject()">Add Subject</button>
+    <button class="reset-button" onclick="resetForm()">Reset</button>
+    <table id="subjectsTable">
+        <thead>
+            <tr>
+                <th>Subject Code</th>
+                <th>Subject Title</th>
+                <th>Internal Marks</th>
+                <th>Max Internal (30)</th>
+                <th>External Marks</th>
+                <th>Max External (70)</th>
+                <th>Total Marks</th>
+                <th>Grade</th>
+                <th>Grade Points</th>
+                <th>Credit Points</th>
+                <th>Secured Points (C*GP)</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody id="subjectsBody">
+            <!-- Subject rows will be added here dynamically -->
+        </tbody>
+    </table>
+
+    <div class="result">
+        <p><strong>SGPA:</strong> <span id="sgpa">0.00</span></p>
+    </div>
+    <button class="print-button" onclick="window.print()">Print SGPA Report</button>
+    
+    <footer>
+        <p>SGPA Calculator - <b>© 2024 by Mr. Sai Ram Kondabattula</b></p>
+    </footer>
+
+    <script>
+        let subjects = [];
+
+        function addSubject() {
+            const subject = {
+                code: prompt("Enter Subject Code"),
+                title: prompt("Enter Subject Title"),
+                internal: 0,
+                external: 0,
+                creditPoints: parseFloat(prompt("Enter Credit Points"))
+            };
+            subjects.push(subject);
+            renderSubjects();
+        }
+
+        function renderSubjects() {
+            const tbody = document.getElementById("subjectsBody");
+            tbody.innerHTML = "";
+            subjects.forEach((subject, index) => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${subject.code}</td>
+                    <td>${subject.title}</td>
+                    <td><input type="number" min="0" max="30" onchange="updateMarks(${index}, 'internal', this.value)"></td>
+                    <td>30</td>
+                    <td><input type="number" min="0" max="70" onchange="updateMarks(${index}, 'external', this.value)"></td>
+                    <td>70</td>
+                    <td id="total-${index}">0</td>
+                    <td id="grade-${index}">F</td>
+                    <td id="gp-${index}">0</td>
+                    <td>${subject.creditPoints}</td>
+                    <td id="secured-${index}">0</td>
+                    <td><button class="edit-button" onclick="editSubject(${index})">Edit</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function editSubject(index) {
+            const newCode = prompt("Enter new Subject Code", subjects[index].code);
+            const newTitle = prompt("Enter new Subject Title", subjects[index].title);
+            subjects[index].code = newCode;
+            subjects[index].title = newTitle;
+            renderSubjects();
+        }
+
+        function updateMarks(index, type, value) {
+            subjects[index][type] = parseFloat(value) || 0;
+            calculateGrade(index);
+            calculateSGPA();
+        }
+
+        function calculateGrade(index) {
+            const subject = subjects[index];
+            const total = subject.internal + subject.external;
+            document.getElementById(`total-${index}`).innerText = total;
+
+            let grade = "F", gradePoints = 0;
+
+            if (total >= 90 && total <= 100) { 
+                grade = "S"; 
+                gradePoints = 10; 
+            } else if (total >= 80 && total < 90) { 
+                grade = "A"; 
+                gradePoints = 9; 
+            } else if (total >= 70 && total < 80) { 
+                grade = "B"; 
+                gradePoints = 8; 
+            } else if (total >= 60 && total < 70) { 
+                grade = "C"; 
+                gradePoints = 7; 
+            } else if (total >= 50 && total < 60) { 
+                grade = "D"; 
+                gradePoints = 6; 
+            } else if (total >= 40 && total < 50) { 
+                grade = "E"; 
+                gradePoints = 5; 
+            } else if (total < 40) {
+                grade = "F"; 
+                gradePoints = 0;
+            }
+
+            document.getElementById(`grade-${index}`).innerText = grade;
+            document.getElementById(`gp-${index}`).innerText = gradePoints;
+            document.getElementById(`secured-${index}`).innerText = (subject.creditPoints * gradePoints).toFixed(2);
+
+            subject.grade = grade;
+            subject.gradePoints = gradePoints;
+            subject.securedPoints = subject.creditPoints * gradePoints;
+        }
+
+        function calculateSGPA() {
+            const totalCredits = subjects.reduce((sum, sub) => sum + sub.creditPoints, 0);
+            const totalSecuredPoints = subjects.reduce((sum, sub) => sum + sub.securedPoints, 0);
+
+            const sgpa = totalCredits ? (totalSecuredPoints / totalCredits).toFixed(2) : 0;
+            document.getElementById("sgpa").innerText = sgpa;
+        }
+
+        function updateResultHeader() {
+            const year = document.getElementById("yearSelect").value;
+            const semester = document.getElementById("semesterSelect").value;
+            const resultHeader = document.getElementById("resultHeader");
+
+            if (year && semester) {
+                resultHeader.innerText = `B.Tech ${year} YEAR ${semester} SEMESTER RESULTS`;
+            } else {
+                resultHeader.innerText = "";
+            }
+        }
+
+        function updateSemesterOptions() {
+            const year = document.getElementById("yearSelect").value;
+            const semesterSelect = document.getElementById("semesterSelect");
+            semesterSelect.innerHTML = "<option value=''>Select Semester</option>";
+
+            if (year === "1") {
+                semesterSelect.innerHTML += "<option value='1st'>1st Semester</option><option value='2nd'>2nd Semester</option>";
+            } else if (year === "2") {
+                semesterSelect.innerHTML += "<option value='3rd'>3rd Semester</option><option value='4th'>4th Semester</option>";
+            } else if (year === "3") {
+                semesterSelect.innerHTML += "<option value='5th'>5th Semester</option><option value='6th'>6th Semester</option>";
+            } else if (year === "4") {
+                semesterSelect.innerHTML += "<option value='7th'>7th Semester</option><option value='8th'>8th Semester</option>";
+            }
+        }
+
+        function resetForm() {
+            document.getElementById("studentName").value = "";
+            document.getElementById("rollNumber").value = "";
+            document.getElementById("courseBranch").value = "";
+            document.getElementById("yearSelect").value = "";
+            document.getElementById("semesterSelect").innerHTML = "<option value=''>Select Semester</option>";
+            document.getElementById("resultHeader").innerText = "";
+            subjects = [];
+            renderSubjects();
+            document.getElementById("sgpa").innerText = "0.00";
+        }
+    </script>
+</body>
+</html>
